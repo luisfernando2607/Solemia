@@ -1,9 +1,67 @@
-@import 'tailwindcss';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer base {
+    body {
+        @apply bg-cream text-gray-800;
+    }
+}
+
+@layer components {
+    .sidebar-link {
+        @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200;
+    }
+    .sidebar-link-active {
+        @apply bg-olive-500 text-white shadow-lg shadow-olive-500/30;
+    }
+    .sidebar-link-inactive {
+        @apply text-olive-100 hover:bg-olive-700 hover:text-white;
+    }
+    .card {
+        @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+    }
+    .btn-primary {
+        @apply bg-olive-600 hover:bg-olive-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-olive-600/25 active:scale-[0.98];
+    }
+    .btn-secondary {
+        @apply bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 transition-all duration-200 hover:shadow-sm active:scale-[0.98];
+    }
+    .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+    .badge-green {
+        @apply badge bg-emerald-100 text-emerald-700;
+    }
+    .badge-red {
+        @apply badge bg-red-100 text-red-700;
+    }
+    .badge-gray {
+        @apply badge bg-gray-100 text-gray-600;
+    }
+    .badge-blue {
+        @apply badge bg-blue-100 text-blue-700;
+    }
+    .badge-gold {
+        @apply badge bg-gold-100 text-gold-700;
+    }
+    .input-field {
+        @apply mt-1 block w-full rounded-lg border-gray-200 shadow-sm focus:border-olive-500 focus:ring focus:ring-olive-200 focus:ring-opacity-50 transition-all duration-200;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #dce9c8;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #bfd79e;
 }
