@@ -4,7 +4,6 @@ namespace App\Livewire\Menu;
 
 use App\Models\Category;
 use App\Models\Product;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
@@ -97,47 +96,36 @@ class Index extends Component
 
         if ($this->editingCategory) {
             $this->editingCategory->update($data);
-            $this->dispatch('swal', icon: 'success', title: 'Categoría actualizada');
+            $this->js("Swal.fire({icon: 'success', title: 'Categoría actualizada', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
         } else {
             $data['is_active'] = true;
             Category::create($data);
-            $this->dispatch('swal', icon: 'success', title: 'Categoría creada');
+            $this->js("Swal.fire({icon: 'success', title: 'Categoría creada', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
         }
 
         $this->resetCategoryForm();
     }
 
-    public function confirmDeleteCategory($categoryId): void
+    public function removeCategory($id)
     {
-        $this->dispatch('confirm', [
-            'title' => '¿Eliminar categoría?',
-            'text' => 'Esta acción no se puede deshacer.',
-            'icon' => 'warning',
-            'confirmText' => 'Sí, eliminar',
-            'cancelText' => 'Cancelar',
-            'callback' => 'deleteCategory',
-            'params' => ['categoryId' => $categoryId],
-        ]);
-    }
-
-    #[On('deleteCategory')]
-    public function deleteCategory($categoryId): void
-    {
-        $category = Category::find($categoryId);
-        if (!$category) return;
-
-        if ($category->products()->count() > 0) {
-            $this->dispatch('swal', icon: 'warning', title: 'Tiene productos', text: 'Elimina o mueve los productos primero');
+        $category = Category::find($id);
+        if (!$category) {
+            $this->js("Swal.fire({icon: 'error', title: 'Categoría no encontrada'})");
             return;
         }
-        if ($category->image_path) {
-            Storage::disk('public')->delete($category->image_path);
+
+        $other = Category::where('id', '!=', $id)->first();
+        if ($other) {
+            Product::withTrashed()->where('category_id', $id)->update(['category_id' => $other->id]);
         }
+
         $category->delete();
-        if ($this->selectedCategoryId === $category->id) {
+
+        if ($this->selectedCategoryId === $id) {
             $this->selectedCategoryId = Category::first()?->id;
         }
-        $this->dispatch('swal', icon: 'success', title: 'Categoría eliminada');
+
+        $this->js("Swal.fire({icon: 'success', title: 'Categoría eliminada', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
     }
 
     // Product CRUD
@@ -215,39 +203,25 @@ class Index extends Component
 
         if ($this->editingProduct) {
             $this->editingProduct->update($data);
-            $this->dispatch('swal', icon: 'success', title: 'Producto actualizado');
+            $this->js("Swal.fire({icon: 'success', title: 'Producto actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
         } else {
             Product::create($data);
-            $this->dispatch('swal', icon: 'success', title: 'Producto creado');
+            $this->js("Swal.fire({icon: 'success', title: 'Producto creado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
         }
 
         $this->resetProductForm();
     }
 
-    public function confirmDeleteProduct($productId): void
+    public function deleteProduct($id): void
     {
-        $this->dispatch('confirm', [
-            'title' => '¿Eliminar producto?',
-            'text' => 'Esta acción no se puede deshacer.',
-            'icon' => 'warning',
-            'confirmText' => 'Sí, eliminar',
-            'cancelText' => 'Cancelar',
-            'callback' => 'deleteProduct',
-            'params' => ['productId' => $productId],
-        ]);
-    }
-
-    #[On('deleteProduct')]
-    public function deleteProduct($productId): void
-    {
-        $product = Product::find($productId);
+        $product = Product::find($id);
         if (!$product) return;
 
         if ($product->image_path) {
             Storage::disk('public')->delete($product->image_path);
         }
         $product->delete();
-        $this->dispatch('swal', icon: 'success', title: 'Producto eliminado');
+        $this->js("Swal.fire({icon: 'success', title: 'Producto eliminado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
     }
 
     public function render()

@@ -3,7 +3,6 @@
 namespace App\Livewire\Customers;
 
 use App\Models\Customer;
-use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -103,20 +102,6 @@ class Index extends Component
         $this->resetForm();
     }
 
-    public function confirmDelete($id): void
-    {
-        $this->dispatch('confirm', [
-            'title' => '¿Eliminar cliente?',
-            'text' => 'Esta acción no se puede deshacer.',
-            'icon' => 'warning',
-            'confirmText' => 'Sí, eliminar',
-            'cancelText' => 'Cancelar',
-            'callback' => 'delete',
-            'params' => ['id' => $id],
-        ]);
-    }
-
-    #[On('delete')]
     public function delete($id): void
     {
         $customer = Customer::find($id);

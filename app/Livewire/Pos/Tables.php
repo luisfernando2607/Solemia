@@ -6,7 +6,6 @@ use App\Models\Order;
 use App\Models\TableModel;
 use App\Models\Zone;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -110,20 +109,6 @@ class Tables extends Component
         $this->resetZoneForm();
     }
 
-    public function confirmDeleteZone($id): void
-    {
-        $this->dispatch('confirm', [
-            'title' => '¿Eliminar zona?',
-            'text' => 'Esta acción no se puede deshacer.',
-            'icon' => 'warning',
-            'confirmText' => 'Sí, eliminar',
-            'cancelText' => 'Cancelar',
-            'callback' => 'deleteZone',
-            'params' => ['id' => $id],
-        ]);
-    }
-
-    #[On('deleteZone')]
     public function deleteZone($id)
     {
         $zone = Zone::withCount('tables')->findOrFail($id);
@@ -191,20 +176,6 @@ class Tables extends Component
         $this->resetTableForm();
     }
 
-    public function confirmDeleteTable($id): void
-    {
-        $this->dispatch('confirm', [
-            'title' => '¿Eliminar mesa?',
-            'text' => 'Esta acción no se puede deshacer.',
-            'icon' => 'warning',
-            'confirmText' => 'Sí, eliminar',
-            'cancelText' => 'Cancelar',
-            'callback' => 'deleteTable',
-            'params' => ['id' => $id],
-        ]);
-    }
-
-    #[On('deleteTable')]
     public function deleteTable($id)
     {
         $table = TableModel::findOrFail($id);

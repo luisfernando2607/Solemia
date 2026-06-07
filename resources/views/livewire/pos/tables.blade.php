@@ -125,7 +125,23 @@
                         <button wire:click="editZone({{ $selectedZoneData->id }})" class="text-xs text-gray-400 hover:text-olive-600">
                             <i class="fas fa-pen"></i>
                         </button>
-                        <button wire:click="confirmDeleteZone({{ $selectedZoneData->id }})" class="text-xs text-gray-400 hover:text-red-500">
+                        <button x-data="{ confirmed: false }"
+                            wire:click.stop="deleteZone({{ $selectedZoneData->id }})"
+                            x-on:click.capture="
+                                if (!confirmed) {
+                                    $event.preventDefault();
+                                    $event.stopPropagation();
+                                    Swal.fire({ title: '¿Eliminar zona?', text: 'Esta acción no se puede deshacer.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+                                    }).then((r) => {
+                                        if (r.isConfirmed) {
+                                            confirmed = true;
+                                            $el.click();
+                                            confirmed = false;
+                                        }
+                                    });
+                                }
+                            "
+                            class="text-xs text-gray-400 hover:text-red-500">
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -188,7 +204,22 @@
                                             class="w-7 h-7 rounded-full bg-olive-500 text-white text-xs flex items-center justify-center hover:scale-110 transition-transform shadow" title="Editar">
                                             <i class="fas fa-pen"></i>
                                         </button>
-                                        <button wire:click="confirmDeleteTable({{ $table->id }})"
+                                        <button x-data="{ confirmed: false }"
+                                            wire:click.stop="deleteTable({{ $table->id }})"
+                                            x-on:click.capture="
+                                                if (!confirmed) {
+                                                    $event.preventDefault();
+                                                    $event.stopPropagation();
+                                                    Swal.fire({ title: '¿Eliminar mesa?', text: 'Esta acción no se puede deshacer.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+                                                    }).then((r) => {
+                                                        if (r.isConfirmed) {
+                                                            confirmed = true;
+                                                            $el.click();
+                                                            confirmed = false;
+                                                        }
+                                                    });
+                                                }
+                                            "
                                             class="w-7 h-7 rounded-full bg-red-500 text-white text-xs flex items-center justify-center hover:scale-110 transition-transform shadow" title="Eliminar">
                                             <i class="fas fa-trash-can"></i>
                                         </button>

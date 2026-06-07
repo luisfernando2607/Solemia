@@ -13,6 +13,18 @@ document.addEventListener('livewire:init', () => {
         Swal.fire(data[0]);
     });
 
+    Livewire.on('toast', (data) => {
+        Swal.fire({
+            icon: data[0].icon || 'success',
+            title: data[0].message || data[0].title || '',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+        });
+    });
+
     Livewire.on('confirm', (data) => {
         Swal.fire({
             title: data[0].title || '¿Estás seguro?',

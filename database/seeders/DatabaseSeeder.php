@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
 use App\Models\Customer;
-use App\Models\Product;
 use App\Models\TableModel;
 use App\Models\User;
 use App\Models\Zone;
@@ -15,6 +13,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RoleAndPermissionSeeder::class);
+
+        $this->call(MenuSeeder::class);
 
         // Users
         $admin = User::firstOrCreate(['email' => 'admin@solemia.com'], ['name' => 'Administrador', 'password' => bcrypt('admin123'), 'pin' => '1234']);
@@ -48,27 +48,11 @@ class DatabaseSeeder extends Seeder
         TableModel::create(['zone_id' => $barra->id, 'number' => 'B2', 'capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 80, 'pos_y' => 0]);
         TableModel::create(['zone_id' => $barra->id, 'number' => 'B3', 'capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 160, 'pos_y' => 0]);
 
-        // Categories & Products
-        $entradas = Category::create(['name' => 'Entradas', 'sort_order' => 1]);
-        $fuertes = Category::create(['name' => 'Platos fuertes', 'sort_order' => 2]);
-        $bebidas = Category::create(['name' => 'Bebidas', 'sort_order' => 3]);
-        $postres = Category::create(['name' => 'Postres', 'sort_order' => 4]);
-
-        Product::create(['category_id' => $entradas->id, 'name' => 'Bruschetta', 'base_price' => 8.50, 'prep_time_minutes' => 5, 'kitchen_area' => 'frio']);
-        Product::create(['category_id' => $entradas->id, 'name' => 'Carpaccio', 'base_price' => 12.00, 'prep_time_minutes' => 7, 'kitchen_area' => 'frio']);
-        Product::create(['category_id' => $fuertes->id, 'name' => 'Lomo Saltado', 'base_price' => 18.50, 'prep_time_minutes' => 15, 'kitchen_area' => 'parrilla']);
-        Product::create(['category_id' => $fuertes->id, 'name' => 'Pasta Alfredo', 'base_price' => 14.00, 'prep_time_minutes' => 12, 'kitchen_area' => 'cocina']);
-        Product::create(['category_id' => $fuertes->id, 'name' => 'Pizza Margherita', 'base_price' => 16.00, 'prep_time_minutes' => 20, 'kitchen_area' => 'horno']);
-        Product::create(['category_id' => $bebidas->id, 'name' => 'Limonada Natural', 'base_price' => 4.50, 'prep_time_minutes' => 3, 'kitchen_area' => 'bebidas']);
-        Product::create(['category_id' => $bebidas->id, 'name' => 'Vino Tinto', 'base_price' => 22.00, 'prep_time_minutes' => 2, 'kitchen_area' => 'bebidas']);
-        Product::create(['category_id' => $postres->id, 'name' => 'Tiramisú', 'base_price' => 9.00, 'prep_time_minutes' => 5, 'kitchen_area' => 'postres']);
-        Product::create(['category_id' => $postres->id, 'name' => 'Panna Cotta', 'base_price' => 8.00, 'prep_time_minutes' => 4, 'kitchen_area' => 'postres']);
-
         // Customers
-        Customer::create(['name' => 'Juan Pérez', 'ruc' => '1712345678001', 'phone' => '0991234567', 'email' => 'juan@email.com', 'address' => 'Av. Amazonas N52-123']);
-        Customer::create(['name' => 'María González', 'ruc' => '1723456789001', 'phone' => '0982345678', 'email' => 'maria@email.com', 'address' => 'Calle República E4-567']);
-        Customer::create(['name' => 'Carlos Rodríguez', 'ruc' => '1734567890001', 'phone' => '0973456789', 'email' => 'carlos@email.com', 'address' => 'Av. 6 de Diciembre N78-901']);
-        Customer::create(['name' => 'Ana Martínez', 'phone' => '0964567890', 'email' => 'ana@email.com']);
-        Customer::create(['name' => 'Luis Fernando Torres', 'ruc' => '1745678900001', 'phone' => '0955678901', 'email' => 'luis@email.com', 'address' => 'Av. Eloy Alfaro O1-234']);
+        Customer::firstOrCreate(['ruc' => '1712345678001'], ['name' => 'Juan Pérez', 'phone' => '0991234567', 'email' => 'juan@email.com', 'address' => 'Av. Amazonas N52-123']);
+        Customer::firstOrCreate(['ruc' => '1723456789001'], ['name' => 'María González', 'phone' => '0982345678', 'email' => 'maria@email.com', 'address' => 'Calle República E4-567']);
+        Customer::firstOrCreate(['ruc' => '1734567890001'], ['name' => 'Carlos Rodríguez', 'phone' => '0973456789', 'email' => 'carlos@email.com', 'address' => 'Av. 6 de Diciembre N78-901']);
+        Customer::firstOrCreate(['email' => 'ana@email.com'], ['name' => 'Ana Martínez', 'phone' => '0964567890']);
+        Customer::firstOrCreate(['ruc' => '1745678900001'], ['name' => 'Luis Fernando Torres', 'phone' => '0955678901', 'email' => 'luis@email.com', 'address' => 'Av. Eloy Alfaro O1-234']);
     }
 }

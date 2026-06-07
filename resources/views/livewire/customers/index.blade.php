@@ -100,7 +100,23 @@
                                 <button wire:click="showEditForm({{ $customer->id }})" class="text-gray-400 hover:text-olive-600 mr-2">
                                     <i class="fas fa-pen text-xs"></i>
                                 </button>
-                                <button wire:click="confirmDelete({{ $customer->id }})" class="text-gray-400 hover:text-red-500">
+                                <button x-data="{ confirmed: false }"
+                                    wire:click.stop="delete({{ $customer->id }})"
+                                    x-on:click.capture="
+                                        if (!confirmed) {
+                                            $event.preventDefault();
+                                            $event.stopPropagation();
+                                            Swal.fire({ title: '¿Eliminar cliente?', text: 'Esta acción no se puede deshacer.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+                                            }).then((r) => {
+                                                if (r.isConfirmed) {
+                                                    confirmed = true;
+                                                    $el.click();
+                                                    confirmed = false;
+                                                }
+                                            });
+                                        }
+                                    "
+                                    class="text-gray-400 hover:text-red-500">
                                     <i class="fas fa-trash-can text-xs"></i>
                                 </button>
                             </td>

@@ -25,23 +25,46 @@
             </div>
             <div class="flex-1 overflow-y-auto p-2 space-y-1">
                 @forelse ($this->categories as $category)
-                    <button wire:click="selectCategory({{ $category->id }})"
-                        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all text-left
-                        {{ $selectedCategoryId === $category->id ? 'bg-olive-100 text-olive-800 font-medium' : 'text-gray-600 hover:bg-gray-50' }}">
-                        @if($category->image_path)
-                            <img src="{{ \Illuminate\Support\Facades\Storage::url($category->image_path) }}" class="w-6 h-6 rounded object-cover" />
-                        @else
-                            <i class="fas fa-folder text-olive-400 text-xs"></i>
-                        @endif
-                        <span class="flex-1 truncate">{{ $category->name }}</span>
-                        <span class="text-xs text-gray-400">{{ $category->products_count }}</span>
-                        <button wire:click.stop="showCategoryEdit({{ $category->id }})" class="text-gray-300 hover:text-olive-600">
-                            <i class="fas fa-pen text-[10px]"></i>
-                        </button>
-                        <button wire:click.stop="confirmDeleteCategory({{ $category->id }})" class="text-gray-300 hover:text-red-500">
-                            <i class="fas fa-trash-can text-[10px]"></i>
-                        </button>
-                    </button>
+                    <div wire:key="cat-{{ $category->id }}"
+                        class="group flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer
+                        {{ $selectedCategoryId === $category->id ? 'bg-olive-100 text-olive-800 font-medium ring-1 ring-olive-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                        <div class="flex items-center gap-2 flex-1 min-w-0" wire:click="selectCategory({{ $category->id }})">
+                            @if($category->image_path)
+                                <img src="{{ \Illuminate\Support\Facades\Storage::url($category->image_path) }}" class="w-7 h-7 rounded-lg object-cover" />
+                            @else
+                                <div class="w-7 h-7 rounded-lg bg-olive-50 flex items-center justify-center">
+                                    <i class="fas fa-folder text-olive-400 text-xs"></i>
+                                </div>
+                            @endif
+                            <span class="flex-1 truncate">{{ $category->name }}</span>
+                            <span class="text-xs text-gray-400 mr-1">{{ $category->products_count }}</span>
+                        </div>
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button wire:click.stop="showCategoryEdit({{ $category->id }})"
+                                class="p-1.5 rounded-lg text-gray-400 hover:text-olive-600 hover:bg-olive-50 transition-colors" title="Editar">
+                                <i class="fas fa-pen text-xs"></i>
+                            </button>
+                            <button x-data="{ confirmed: false }"
+                                wire:click.stop="removeCategory({{ $category->id }})"
+                                x-on:click.capture="
+                                    if (!confirmed) {
+                                        $event.preventDefault();
+                                        $event.stopPropagation();
+                                        Swal.fire({ title: '¿Eliminar categoría?', text: 'Los productos se moverán a otra categoría.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+                                        }).then((r) => {
+                                            if (r.isConfirmed) {
+                                                confirmed = true;
+                                                $el.click();
+                                                confirmed = false;
+                                            }
+                                        });
+                                    }
+                                "
+                                class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Eliminar">
+                                <i class="fas fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
                 @empty
                     <div class="text-center py-6 text-gray-400 text-xs">
                         <i class="fas fa-folder-open text-lg mb-1 block"></i>
@@ -196,7 +219,23 @@
                                                 <button wire:click="showProductEdit({{ $product->id }})" class="p-1 text-gray-400 hover:text-olive-600">
                                                     <i class="fas fa-pen text-xs"></i>
                                                 </button>
-                                                <button wire:click="confirmDeleteProduct({{ $product->id }})" class="p-1 text-gray-400 hover:text-red-500">
+                                                <button x-data="{ confirmed: false }"
+                                                    wire:click.stop="deleteProduct({{ $product->id }})"
+                                                    x-on:click.capture="
+                                                        if (!confirmed) {
+                                                            $event.preventDefault();
+                                                            $event.stopPropagation();
+                                                            Swal.fire({ title: '¿Eliminar producto?', text: 'Esta acción no se puede deshacer.', icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+                                                            }).then((r) => {
+                                                                if (r.isConfirmed) {
+                                                                    confirmed = true;
+                                                                    $el.click();
+                                                                    confirmed = false;
+                                                                }
+                                                            });
+                                                        }
+                                                    "
+                                                    class="p-1 text-gray-400 hover:text-red-500">
                                                     <i class="fas fa-trash-can text-xs"></i>
                                                 </button>
                                             </div>
