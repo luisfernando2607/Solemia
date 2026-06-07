@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\Order;
 use App\Models\Invoice;
+use App\Models\Order;
 use DOMDocument;
-use DOMElement;
+use Illuminate\Support\Facades\Storage;
 
 class SriInvoiceGenerator
 {
@@ -15,8 +15,8 @@ class SriInvoiceGenerator
     {
         $this->config = [
             'ruc' => env('SRI_RUC', '9999999999999'),
-            'razon_social' => env('SRI_RAZON_SOCIAL', 'SOLEMIA POS RESTAURANTE'),
-            'nombre_comercial' => env('SRI_NOMBRE_COMERCIAL', 'Solemia'),
+            'razon_social' => env('SRI_RAZON_SOCIAL', 'Restaurante'),
+            'nombre_comercial' => env('SRI_NOMBRE_COMERCIAL', 'Restaurante'),
             'dir_matriz' => env('SRI_DIR_MATRIZ', 'Av. Principal'),
             'ambiente' => env('SRI_AMBIENTE', '1'),
             'tipo_emision' => env('SRI_TIPO_EMISION', '1'),
@@ -93,7 +93,7 @@ class SriInvoiceGenerator
             $detalle = $dom->createElement('detalle');
             $detalle->appendChild($dom->createElement('codigoPrincipal', $item->product->sku ?? sprintf('P%05d', $item->product_id)));
             $detalle->appendChild($dom->createElement('descripcion', htmlspecialchars($item->product->name)));
-            $detalle->appendChild($dom->createElement('cantidad', (string)$item->quantity));
+            $detalle->appendChild($dom->createElement('cantidad', (string) $item->quantity));
             $detalle->appendChild($dom->createElement('precioUnitario', number_format($item->unit_price, 2, '.', '')));
             $detalle->appendChild($dom->createElement('descuento', '0.00'));
             $detalle->appendChild($dom->createElement('precioTotalSinImpuesto', number_format($item->subtotal, 2, '.', '')));
@@ -117,7 +117,7 @@ class SriInvoiceGenerator
 
         // Save XML
         $xmlPath = sprintf('invoices/%s/%s.xml', date('Y/m'), $accessKey);
-        \Illuminate\Support\Facades\Storage::disk('public')->put($xmlPath, $xml);
+        Storage::disk('public')->put($xmlPath, $xml);
 
         // Create Invoice record
         Invoice::create([
@@ -139,7 +139,8 @@ class SriInvoiceGenerator
     protected function nextSequential(): string
     {
         $last = Invoice::where('sequential', 'like', '001-001-%')->orderBy('id', 'desc')->first();
-        $next = $last ? (int)substr($last->sequential, -9) + 1 : 1;
+        $next = $last ? (int) substr($last->sequential, -9) + 1 : 1;
+
         return sprintf('001-001-%09d', $next);
     }
 
@@ -150,15 +151,15 @@ class SriInvoiceGenerator
         $ruc = $this->config['ruc'];
         $ambiente = $this->config['ambiente'];
         $serie = '001001';
-        $codigoNumerico = str_pad((string)random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+        $codigoNumerico = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
         $tipoEmision = $this->config['tipo_emision'];
 
         $digitosVerificadores = '21';
 
-        $base = $date . $tipoComp . $ruc . $ambiente . $serie . $sequential . $codigoNumerico . $tipoEmision;
+        $base = $date.$tipoComp.$ruc.$ambiente.$serie.$sequential.$codigoNumerico.$tipoEmision;
         $mod = $this->mod11($base);
 
-        return $base . $mod;
+        return $base.$mod;
     }
 
     protected function mod11(string $number): string
@@ -169,15 +170,20 @@ class SriInvoiceGenerator
         $factorIndex = 0;
 
         for ($i = $len - 1; $i >= 0; $i--) {
-            $total += (int)$number[$i] * $factors[$factorIndex];
+            $total += (int) $number[$i] * $factors[$factorIndex];
             $factorIndex = ($factorIndex + 1) % 6;
         }
 
         $remainder = $total % 11;
         $checkDigit = 11 - $remainder;
 
-        if ($checkDigit === 11) return '0';
-        if ($checkDigit === 10) return '1';
-        return (string)$checkDigit;
+        if ($checkDigit === 11) {
+            return '0';
+        }
+        if ($checkDigit === 10) {
+            return '1';
+        }
+
+        return (string) $checkDigit;
     }
 }

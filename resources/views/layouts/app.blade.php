@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Solemia')) - Solemia POS</title>
+    <title>@yield('title', config('app.name', 'Solemia')) - Solémia POS</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <link href="https://fonts.bunny.net/css?family=playfair-display:500,600,700&display=swap" rel="stylesheet" />
@@ -132,7 +132,7 @@
                         <button @@click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-olive-600 p-1">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
-                            <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Solemia POS</h1>
+                            <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Solémia POS</h1>
                     </div>
                     <div class="flex items-center gap-2 md:gap-3">
                         <a href="{{ route('profile') }}" wire:navigate class="text-gray-400 hover:text-olive-600 transition-colors" title="Perfil">
