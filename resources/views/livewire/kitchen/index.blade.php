@@ -83,7 +83,7 @@
                                                 {{ ucfirst($item->kitchen_area) }}
                                             </span>
                                             <span class="text-sm font-semibold text-gray-800">{{ $item->quantity }}x</span>
-                                            <span class="text-sm text-gray-800 truncate">{{ $item->product->name }}</span>
+                                            <span class="text-sm text-gray-800 truncate">{{ $item->product?->name ?? '—' }}</span>
                                         </div>
                                         @if($item->notes)
                                             <p class="text-xs text-gray-400 ml-1 mt-0.5 italic">Nota: {{ $item->notes }}</p>

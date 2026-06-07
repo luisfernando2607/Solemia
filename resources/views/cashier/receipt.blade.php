@@ -36,20 +36,31 @@
             .no-print { display: none; }
             body { width: 72mm; }
         }
-        .no-print { text-align: center; margin-bottom: 5mm; }
+        .no-print { text-align: center; margin-bottom: 5mm; display: flex; align-items: center; justify-content: center; gap: 6mm; }
         .no-print button {
-            background: #6B8E4E; color: white; border: none;
-            padding: 8px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;
+            border: none; cursor: pointer; border-radius: 50%;
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+            transition: background .2s; outline: none;
         }
-        .no-print button:hover { background: #5a7a42; }
+        .no-print button svg { width: 22px; height: 22px; display: block; }
+        .btn-print { background: #6B8E4E; color: #fff; }
+        .btn-print:hover { background: #5a7a42; }
+        .btn-close { background: #e5e7eb; color: #374151; }
+        .btn-close:hover { background: #d1d5db; }
     </style>
 </head>
 <body>
     <div class="no-print">
-        <button onclick="window.print()">🖨 Imprimir ticket</button>
-        <button onclick="window.close()" style="background:#6b7280;margin-left:8px;">Cerrar</button>
-        <p style="margin-top:4mm;font-size:11px;color:#666;">Vista previa del ticket térmico (80mm)</p>
-        <hr style="margin:3mm 0;">
+        <button onclick="window.print()" class="btn-print" title="Imprimir ticket">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+        </button>
+        <button onclick="window.close()" class="btn-close" title="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
     </div>
 
     <div class="header">
@@ -76,7 +87,7 @@
         @foreach ($order->items as $item)
             <tr>
                 <td class="qty">{{ $item->quantity }}x</td>
-                <td class="name">{{ $item->product->name }}</td>
+                <td class="name">{{ $item->product?->name ?? '—' }}</td>
                 <td class="price">${{ number_format($item->unit_price, 2) }}</td>
                 <td class="subtotal">${{ number_format($item->subtotal, 2) }}</td>
             </tr>

@@ -117,7 +117,7 @@ class TableOrder extends Component
     public function sendToKitchen(): void
     {
         if ($this->order->items()->where('kitchen_status', 'pending')->count() === 0) {
-            $this->dispatch('swal', icon: 'warning', title: 'Sin items pendientes', text: 'Todos los items ya fueron enviados');
+            $this->js("Swal.fire({icon:'warning',title:'Sin items pendientes',text:'Todos los items ya fueron enviados',timer:2000,showConfirmButton:false})");
             return;
         }
 
@@ -137,7 +137,7 @@ class TableOrder extends Component
             'sent_at' => now(),
         ]);
 
-        $this->dispatch('swal', icon: 'success', title: '¡Comanda enviada!', text: 'La orden ha sido enviada a cocina');
+        $this->js("Swal.fire({icon:'success',title:'¡Comanda enviada!',text:'La orden ha sido enviada a cocina',timer:2000,showConfirmButton:false})");
     }
 
     public function saveDraft(): void

@@ -32,21 +32,21 @@ class DatabaseSeeder extends Seeder
         $cocinero = User::firstOrCreate(['email' => 'cocinero@solemia.com'], ['name' => 'Cocinero', 'password' => bcrypt('cocinero123'), 'pin' => '4444']);
         $cocinero->assignRole('Cocinero');
 
-        // Zones
-        $sala = Zone::create(['name' => 'Sala principal', 'description' => 'Área principal del restaurante', 'sort_order' => 1]);
-        $terraza = Zone::create(['name' => 'Terraza', 'description' => 'Área exterior', 'sort_order' => 2]);
-        $barra = Zone::create(['name' => 'Barra', 'description' => 'Barra de atención directa', 'sort_order' => 3]);
+        // Zones (idempotent)
+        $sala = Zone::firstOrCreate(['name' => 'Sala principal'], ['description' => 'Área principal del restaurante', 'sort_order' => 1]);
+        $terraza = Zone::firstOrCreate(['name' => 'Terraza'], ['description' => 'Área exterior', 'sort_order' => 2]);
+        $barra = Zone::firstOrCreate(['name' => 'Barra'], ['description' => 'Barra de atención directa', 'sort_order' => 3]);
 
-        // Tables
+        // Tables (idempotent by zone + number)
         for ($i = 1; $i <= 6; $i++) {
-            TableModel::create(['zone_id' => $sala->id, 'number' => (string)$i, 'capacity' => $i <= 2 ? 2 : 4, 'shape' => 'square', 'pos_x' => ($i - 1) * 120, 'pos_y' => 0]);
+            TableModel::firstOrCreate(['zone_id' => $sala->id, 'number' => (string)$i], ['capacity' => $i <= 2 ? 2 : 4, 'shape' => 'square', 'pos_x' => ($i - 1) * 120, 'pos_y' => 0]);
         }
         for ($i = 7; $i <= 10; $i++) {
-            TableModel::create(['zone_id' => $terraza->id, 'number' => (string)$i, 'capacity' => 4, 'shape' => 'round', 'pos_x' => ($i - 7) * 140, 'pos_y' => 0]);
+            TableModel::firstOrCreate(['zone_id' => $terraza->id, 'number' => (string)$i], ['capacity' => 4, 'shape' => 'round', 'pos_x' => ($i - 7) * 140, 'pos_y' => 0]);
         }
-        TableModel::create(['zone_id' => $barra->id, 'number' => 'B1', 'capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 0, 'pos_y' => 0]);
-        TableModel::create(['zone_id' => $barra->id, 'number' => 'B2', 'capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 80, 'pos_y' => 0]);
-        TableModel::create(['zone_id' => $barra->id, 'number' => 'B3', 'capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 160, 'pos_y' => 0]);
+        TableModel::firstOrCreate(['zone_id' => $barra->id, 'number' => 'B1'], ['capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 0, 'pos_y' => 0]);
+        TableModel::firstOrCreate(['zone_id' => $barra->id, 'number' => 'B2'], ['capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 80, 'pos_y' => 0]);
+        TableModel::firstOrCreate(['zone_id' => $barra->id, 'number' => 'B3'], ['capacity' => 1, 'shape' => 'rectangle', 'pos_x' => 160, 'pos_y' => 0]);
 
         // Customers
         Customer::firstOrCreate(['ruc' => '1712345678001'], ['name' => 'Juan Pérez', 'phone' => '0991234567', 'email' => 'juan@email.com', 'address' => 'Av. Amazonas N52-123']);

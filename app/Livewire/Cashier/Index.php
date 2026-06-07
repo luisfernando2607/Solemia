@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Services\SriInvoiceGenerator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
@@ -175,7 +176,7 @@ class Index extends Component
         ]);
 
         $this->showOpenForm = false;
-        $this->dispatch('swal', icon: 'success', title: 'Caja abierta', text: "Turno iniciado con $$this->openingAmount");
+        $this->js("Swal.fire({icon: 'success', title: 'Caja abierta', text: 'Turno iniciado con \$$this->openingAmount', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
     }
 
     public function closeRegister(): void
@@ -198,8 +199,7 @@ class Index extends Component
             'closed_at' => now(),
         ]);
 
-        $this->dispatch('swal', icon: 'success', title: '✅ Caja cerrada',
-            text: "Total esperado: $$expected | Diferencia: $" . number_format($counted - $expected, 2) . " | Transacciones: $transactions");
+        $this->js("Swal.fire({icon: 'success', title: 'Caja cerrada', text: 'Total esperado: \$$expected | Diferencia: $" . number_format($counted - $expected, 2) . " | Transacciones: $transactions', timer: 3000})");
 
         $this->activeRegister = null;
     }
@@ -221,11 +221,20 @@ class Index extends Component
     // Payment
     public function processPayment(): void
     {
-        if (!$this->selectedOrderId) return;
-        if (!$this->activeRegister) return;
+        if (!$this->selectedOrderId) {
+            $this->js("Swal.fire({icon: 'error', title: 'Selecciona una orden', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500})");
+            return;
+        }
+        if (!$this->activeRegister) {
+            $this->js("Swal.fire({icon: 'error', title: 'Abre una caja primero', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500})");
+            return;
+        }
 
         $order = Order::with(['table', 'items'])->find($this->selectedOrderId);
-        if (!$order) return;
+        if (!$order) {
+            $this->js("Swal.fire({icon: 'error', title: 'Orden no encontrada', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500})");
+            return;
+        }
 
         $total = (float)$order->subtotal + (float)$order->tax;
         $discount = 0;
@@ -236,43 +245,55 @@ class Index extends Component
         }
         $total = $total - $discount + (float)$this->tipAmount;
 
-        if ($this->paymentMethod === 'cash' && (float)$this->cashTendered < $total) return;
-
-        Payment::create([
-            'order_id' => $order->id,
-            'cash_register_id' => $this->activeRegister->id,
-            'method' => $this->paymentMethod,
-            'amount' => $total,
-            'cash_tendered' => $this->paymentMethod === 'cash' ? $this->cashTendered : null,
-            'cash_change' => $this->paymentMethod === 'cash' ? ($this->cashTendered - $total) : null,
-            'status' => 'approved',
-            'processed_by' => Auth::id(),
-            'processed_at' => now(),
-        ]);
-
-        $order->update([
-            'status' => 'complete',
-            'closed_at' => now(),
-            'discount' => $discount,
-            'tip' => $this->tipAmount,
-            'total' => $total,
-            'cashier_id' => Auth::id(),
-            'cash_register_id' => $this->activeRegister->id,
-        ]);
-
-        if ($order->relationLoaded('table') && $order->table) {
-            $order->table->update(['status' => 'available']);
+        if ($this->paymentMethod === 'cash' && (float)$this->cashTendered < $total) {
+            $this->js("Swal.fire({icon: 'error', title: 'Efectivo insuficiente', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500})");
+            return;
         }
 
-        $this->pendingInvoiceName = $this->invoiceCustomerName;
-        $this->pendingInvoiceRuc = $this->invoiceCustomerRuc;
-        $this->pendingInvoiceEmail = $this->invoiceCustomerEmail;
-        $this->pendingInvoiceAddress = $this->invoiceCustomerAddress;
-        $this->pendingSendEmail = $this->sendInvoiceEmail;
+        try {
+            DB::transaction(function () use ($order, $total, $discount) {
+                Payment::create([
+                    'order_id' => $order->id,
+                    'cash_register_id' => $this->activeRegister->id,
+                    'method' => $this->paymentMethod,
+                    'amount' => $total,
+                    'cash_tendered' => $this->paymentMethod === 'cash' ? $this->cashTendered : null,
+                    'cash_change' => $this->paymentMethod === 'cash' ? ($this->cashTendered - $total) : null,
+                    'status' => 'approved',
+                    'processed_by' => Auth::id(),
+                    'processed_at' => now(),
+                ]);
 
-        $this->lastProcessedOrderId = $order->id;
-        $this->selectedOrderId = null;
-        $this->resetPaymentForm();
+                $order->update([
+                    'status' => 'complete',
+                    'closed_at' => now(),
+                    'discount' => $discount,
+                    'tip' => $this->tipAmount,
+                    'total' => $total,
+                    'cashier_id' => Auth::id(),
+                    'cash_register_id' => $this->activeRegister->id,
+                ]);
+
+                if ($order->relationLoaded('table') && $order->table) {
+                    $order->table->update(['status' => 'available']);
+                }
+            });
+
+            $this->pendingInvoiceName = $this->invoiceCustomerName;
+            $this->pendingInvoiceRuc = $this->invoiceCustomerRuc;
+            $this->pendingInvoiceEmail = $this->invoiceCustomerEmail;
+            $this->pendingInvoiceAddress = $this->invoiceCustomerAddress;
+            $this->pendingSendEmail = $this->sendInvoiceEmail;
+
+            $this->lastProcessedOrderId = $order->id;
+            $this->selectedOrderId = null;
+            $this->resetPaymentForm();
+
+            $this->js("Swal.fire({icon: 'success', title: 'Pago procesado', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500, timerProgressBar: true})");
+        } catch (\Throwable $e) {
+            Log::error('Payment processing failed', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            $this->js("Swal.fire({icon: 'error', title: 'Error al procesar pago', text: '{$e->getMessage()}', timer: 4000})");
+        }
     }
 
     public function generateInvoice(): void

@@ -97,7 +97,7 @@
                             {{ $item->kitchen_status === 'pending' ? 'bg-gray-50' : 'bg-blue-50/50' }}">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5">
-                                    <p class="text-sm font-medium text-gray-800 truncate">{{ $item->product->name }}</p>
+                                    <p class="text-sm font-medium text-gray-800 truncate">{{ $item->product?->name ?? '—' }}</p>
                                     @if($item->kitchen_status !== 'pending')
                                         <span class="text-[10px] px-1.5 py-0.5 rounded
                                             {{ $item->kitchen_status === 'preparing' ? 'bg-yellow-100 text-yellow-700' : '' }}

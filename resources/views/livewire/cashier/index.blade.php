@@ -92,8 +92,8 @@
                         </div>
                     </button>
                 @empty
-                    <div class="text-center py-8 text-gray-400 text-xs">
-                        <i class="fas fa-check-circle text-2xl mb-2 block"></i>
+                    <div class="flex flex-col items-center py-8 text-gray-400 text-xs">
+                        <i class="fas fa-inbox text-2xl mb-2"></i>
                         No hay cuentas pendientes
                     </div>
                 @endforelse
@@ -120,18 +120,21 @@
                             · ${{ number_format($lastOrder->total, 2) }}
                         </p>
                         <div class="flex flex-wrap justify-center gap-2">
-                            <a href="{{ route('cashier.receipt', $lastOrder) }}" target="_blank"
+                            <button
+                                x-on:click.prevent="window.open('{{ route('cashier.receipt', $lastOrder) }}', 'ticket', 'width=380,height=600,menubar=no,toolbar=no,scrollbars=yes,resizable=yes')"
                                 class="btn-primary text-sm flex items-center gap-2">
                                 <i class="fas fa-receipt"></i> Imprimir ticket
-                            </a>
+                            </button>
                             @if($lastOrder->invoices->isEmpty())
                                 @if($pendingInvoiceName)
-                                    <button wire:click="generateInvoice" wire:loading.attr="disabled"
+                                    <button x-data="{ invLoading: false }"
+                                        x-on:click="invLoading = true; $wire.generateInvoice().finally(() => invLoading = false)"
+                                        x-bind:disabled="invLoading"
                                         class="btn-secondary text-sm flex items-center gap-2">
-                                        <i wire:loading.remove wire:target="generateInvoice" class="fas fa-file-invoice"></i>
-                                        <i wire:loading wire:target="generateInvoice" class="fas fa-spinner fa-spin"></i>
-                                        <span wire:loading.remove wire:target="generateInvoice">Generar factura</span>
-                                        <span wire:loading wire:target="generateInvoice">Generando...</span>
+                                        <template x-if="!invLoading"><i class="fas fa-file-invoice"></i></template>
+                                        <template x-if="invLoading"><i class="fas fa-spinner fa-spin"></i></template>
+                                        <span x-show="!invLoading">Generar factura</span>
+                                        <span x-show="invLoading">Generando...</span>
                                     </button>
                                 @endif
                             @else
@@ -168,7 +171,7 @@
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm text-gray-800">
                                             <span class="font-medium">{{ $item->quantity }}x</span>
-                                            {{ $item->product->name }}
+                                            {{ $item->product?->name ?? '—' }}
                                         </p>
                                         @if($item->notes)
                                             <p class="text-xs text-gray-400 italic">Nota: {{ $item->notes }}</p>
@@ -305,14 +308,18 @@
                                 <span>Total a pagar</span>
                                 <span>${{ number_format($this->orderTotal, 2) }}</span>
                             </div>
-                            <button wire:click="processPayment"
-                                class="w-full mt-2 py-2.5 bg-olive-600 text-white rounded-xl font-semibold text-sm hover:bg-olive-700 transition-colors shadow-lg shadow-olive-600/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                wire:loading.attr="disabled"
-                                wire:target="processPayment">
-                                <i wire:loading.remove wire:target="processPayment" class="fas fa-check-circle"></i>
-                                <i wire:loading wire:target="processPayment" class="fas fa-spinner fa-spin"></i>
-                                <span wire:loading.remove wire:target="processPayment">Cobrar ${{ number_format($this->orderTotal, 2) }}</span>
-                                <span wire:loading wire:target="processPayment">Procesando...</span>
+                            <button x-data="{ loading: false }"
+                                x-on:click="loading = true; $wire.processPayment().finally(() => loading = false)"
+                                x-bind:disabled="loading"
+                                class="w-full mt-2 py-2.5 bg-olive-600 text-white rounded-xl font-semibold text-sm hover:bg-olive-700 transition-colors shadow-lg shadow-olive-600/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <template x-if="!loading">
+                                    <i class="fas fa-check-circle"></i>
+                                </template>
+                                <template x-if="loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </template>
+                                <span x-show="!loading" x-text="'Cobrar $' + new Intl.NumberFormat('es-EC', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format({{ $this->orderTotal }})"></span>
+                                <span x-show="loading">Procesando...</span>
                             </button>
                         </div>
                     </div>
