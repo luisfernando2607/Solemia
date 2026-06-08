@@ -62,7 +62,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         @foreach ($this->products as $product)
                             <button wire:click="addItem({{ $product->id }})" type="button"
-                                class="flex flex-col rounded-xl border border-gray-200 bg-white hover:border-olive-300 hover:shadow-sm hover:bg-olive-50/50 transition-all text-center group overflow-hidden h-full min-h-[160px]">
+                                class="flex flex-col rounded-xl border border-gray-200 bg-white hover:border-olive-300 hover:shadow-sm hover:bg-olive-50/50 transition-all text-center group overflow-hidden h-full min-h-[600px]">
                                 <div class="flex-1 bg-gradient-to-br from-olive-50 to-cream flex items-center justify-center overflow-hidden">
                                     @if($product->image_path)
                                         <img src="{{ \Illuminate\Support\Facades\Storage::url($product->image_path) }}"
