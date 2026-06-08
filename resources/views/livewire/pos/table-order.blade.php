@@ -62,12 +62,20 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         @foreach ($this->products as $product)
                             <button wire:click="addItem({{ $product->id }})" type="button"
-                                class="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-200 bg-white hover:border-olive-300 hover:shadow-sm hover:bg-olive-50/50 transition-all text-center group">
-                                <div class="w-10 h-10 rounded-full bg-olive-100 flex items-center justify-center mb-1.5 group-hover:bg-olive-200 transition-colors">
-                                    <i class="fas fa-utensil-spoon text-olive-600 text-sm"></i>
+                                class="flex flex-col rounded-xl border border-gray-200 bg-white hover:border-olive-300 hover:shadow-sm hover:bg-olive-50/50 transition-all text-center group overflow-hidden h-full min-h-[160px]">
+                                <div class="flex-1 bg-gradient-to-br from-olive-50 to-cream flex items-center justify-center overflow-hidden">
+                                    @if($product->image_path)
+                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($product->image_path) }}"
+                                            alt="{{ $product->name }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <i class="fas fa-utensil-spoon text-3xl text-olive-300"></i>
+                                    @endif
                                 </div>
-                                <span class="text-xs font-medium text-gray-800 leading-tight">{{ $product->name }}</span>
-                                <span class="text-xs font-bold text-olive-700 mt-0.5">${{ number_format($product->base_price, 2) }}</span>
+                                <div class="p-2">
+                                    <span class="text-xs font-medium text-gray-800 leading-tight line-clamp-2">{{ $product->name }}</span>
+                                    <span class="text-xs font-bold text-olive-700 mt-0.5 block">${{ number_format($product->base_price, 2) }}</span>
+                                </div>
                             </button>
                         @endforeach
                     </div>
@@ -114,7 +122,7 @@
                             <div class="flex items-center gap-1">
                                 <button wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
                                     class="w-6 h-6 rounded bg-white border border-gray-200 flex items-center justify-center text-xs text-gray-600 hover:bg-gray-100"
-                                    @disabled($item->kitchen_status !== 'pending' || $item->quantity <= 1)>
+                                    @disabled($item->kitchen_status !== 'pending')>
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <span class="w-7 text-center text-sm font-bold text-gray-800">{{ $item->quantity }}</span>

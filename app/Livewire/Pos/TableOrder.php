@@ -96,7 +96,13 @@ class TableOrder extends Component
     public function updateQuantity($itemId, $quantity): void
     {
         $item = OrderItem::findOrFail($itemId);
-        $quantity = max(1, (int)$quantity);
+        $quantity = (int)$quantity;
+
+        if ($quantity <= 0) {
+            $item->delete();
+            $this->recalculateOrder();
+            return;
+        }
 
         $item->update([
             'quantity' => $quantity,

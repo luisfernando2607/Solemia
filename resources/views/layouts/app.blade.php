@@ -27,8 +27,8 @@
                         <span class="font-serif font-bold text-white text-base md:text-lg">S</span>
                     </div>
                     <div class="min-w-0">
-                        <span class="font-serif text-lg md:text-xl font-bold text-white block leading-tight">Solemia</span>
-                        <p class="text-olive-400 text-[10px] md:text-xs">POS Ristorante</p>
+                        <span class="font-serif text-lg md:text-xl font-bold text-white block leading-tight">Solémia</span>
+                        <p class="text-olive-400 text-[10px] md:text-xs">Gestión para Restaurantes</p>
                     </div>
                 </a>
                 <button @@click="sidebarOpen = false" class="lg:hidden text-olive-300 hover:text-white p-1">
@@ -132,7 +132,7 @@
                         <button @@click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-olive-600 p-1">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
-                            <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Solémia POS</h1>
+                            <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Restaurante "__"</h1>
                     </div>
                     <div class="flex items-center gap-2 md:gap-3">
                         <a href="{{ route('profile') }}" wire:navigate class="text-gray-400 hover:text-olive-600 transition-colors" title="Perfil">
