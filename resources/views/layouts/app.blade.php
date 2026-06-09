@@ -18,15 +18,14 @@
           dark: localStorage.getItem('dark') === 'true',
           toggleDark() { this.dark = !this.dark; localStorage.setItem('dark', this.dark); if (this.dark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark') }
       }"
-
-x-init="$nextTick(() => { if (dark) document.documentElement.classList.add('dark') })"
+      x-init="if (dark) document.documentElement.classList.add('dark')">
     <div class="flex h-screen overflow-hidden">
         {{-- Overlay --}}
         <div x-show="sidebarOpen" @@click="sidebarOpen = false" class="fixed inset-0 z-20 bg-black/50 lg:hidden" x-cloak></div>
 
         {{-- Sidebar --}}
 
-<aside class="fixed lg:static inset-y-0 left-0 z-30 bg-gradient-to-b from-olive-800 to-olive-950 text-white flex flex-col transition-[width] duration-300 ease-in-out lg:translate-x-0"
+<aside class="fixed lg:static inset-y-0 left-0 z-30 bg-gradient-to-b from-olive-800 to-olive-950 text-white flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0"
        :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'w-16' : 'w-64']">
 
             {{-- Logo & Close --}}
@@ -131,11 +130,11 @@ x-init="$nextTick(() => { if (dark) document.documentElement.classList.add('dark
             {{-- Collapse Toggle & Logout --}}
             <div class="px-2 md:px-3 py-3 md:py-4 border-t border-olive-700/50 space-y-1"
                  :class="sidebarCollapsed ? 'px-1 flex flex-col items-center' : ''">
-                <button @@click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
+                <button x-on:click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
                     class="sidebar-link text-olive-300 hover:text-white hover:bg-olive-700 w-full text-sm md:text-base hidden lg:flex"
                     :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                     :title="sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'">
-                    <i class="fas w-5 text-center text-sm md:text-base" :class="sidebarCollapsed ? 'fa-bars' : 'fa-xmark'"></i>
+                    <i class="fas fa-bars w-5 text-center text-sm md:text-base"></i>
                     <span x-show="!sidebarCollapsed" class="text-sm">Colapsar menú</span>
                 </button>
 
@@ -161,10 +160,10 @@ x-init="$nextTick(() => { if (dark) document.documentElement.classList.add('dark
                         <button @@click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-olive-600 p-1">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
-                        <button @@click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
+                        <button x-on:click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
                             class="hidden lg:flex text-gray-400 hover:text-olive-600 p-1 transition-colors"
                             :title="sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'">
-                            <i class="fas text-lg" :class="sidebarCollapsed ? 'fa-bars' : 'fa-xmark'"></i>
+                            <i class="fas fa-bars text-lg"></i>
                         </button>
                         <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Mi Restaurante</h1>
                     </div>
