@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\RestaurantSetting;
 use App\Services\SriInvoiceGenerator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -129,16 +130,18 @@ class Index extends Component
         $this->cashChange = max(0, (float)$this->cashTendered - $total);
     }
 
+    public function getTipSuggestionsProperty(): array
+    {
+        $tips = RestaurantSetting::current()->tip_suggestions ?? [10, 15, 20];
+        return is_array($tips) ? $tips : [10, 15, 20];
+    }
+
     public function updatedTipMode($value): void
     {
         $order = $this->selectedOrder;
         if (!$order) return;
-        $this->tipAmount = match ($value) {
-            'ten' => round($order->subtotal * 0.10, 2),
-            'fifteen' => round($order->subtotal * 0.15, 2),
-            'twenty' => round($order->subtotal * 0.20, 2),
-            default => 0,
-        };
+        $pct = (int)$value;
+        $this->tipAmount = $pct > 0 ? round($order->subtotal * ($pct / 100), 2) : 0;
         $this->updatedCashTendered();
     }
 

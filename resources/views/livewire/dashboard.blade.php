@@ -297,27 +297,6 @@
 
 <div class="db-root" wire:poll.15s="refreshStats">
 
-    {{-- ── HEADER ROW ─────────────────────────────────────────── --}}
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
-        <div>
-            <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--o500);margin-bottom:0.2rem;">
-                Panel de control
-            </p>
-            <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;font-weight:700;color:var(--o900);line-height:1.1;">
-                Bienvenido, <span style="color:var(--o500);">{{ auth()->user()->name }}</span>
-            </h1>
-        </div>
-        <div style="display:flex;align-items:center;gap:0.75rem;">
-            <span class="poll-badge">
-                <span class="poll-dot"></span>
-                En vivo · cada 15s
-            </span>
-            <span style="font-size:0.78rem;color:var(--o400);">
-                {{ now()->format('d/m/Y  H:i') }}
-            </span>
-        </div>
-    </div>
-
     {{-- ── KPI GRID ────────────────────────────────────────────── --}}
     <div class="kpi-grid">
         {{-- Mesas ocupadas --}}

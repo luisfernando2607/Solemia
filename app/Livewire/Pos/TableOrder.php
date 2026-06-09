@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Order as OrderModel;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\RestaurantSetting;
 use App\Models\TableModel;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
@@ -163,7 +164,8 @@ class TableOrder extends Component
     {
         $this->order->load('items');
         $subtotal = $this->order->items->sum('subtotal');
-        $tax = round($subtotal * 0.15, 2);
+        $taxRate = (float)(RestaurantSetting::current()->tax_rate ?? 15) / 100;
+        $tax = round($subtotal * $taxRate, 2);
         $total = $subtotal + $tax - $this->order->discount + $this->order->tip;
 
         $this->order->update([

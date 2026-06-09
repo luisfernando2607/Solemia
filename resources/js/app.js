@@ -1,7 +1,9 @@
 import Swal from 'sweetalert2';
 import '@fortawesome/fontawesome-free/js/all';
+import Chart from 'chart.js/auto';
 
 window.Swal = Swal;
+window.Chart = Chart;
 
 Swal.setDefaults({
     confirmButtonColor: '#556F3E',

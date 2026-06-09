@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\RestaurantSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -26,11 +27,13 @@ class InvoiceMail extends Mailable
         $this->order = $order;
         $this->payment = $order->payments()->where('status', 'approved')->first();
         $this->invoice = $invoice;
+        $s = RestaurantSetting::current();
         $this->restaurant = [
-            'name' => env('SRI_NOMBRE_COMERCIAL', 'Solemia'),
-            'ruc' => env('SRI_RUC', '9999999999999'),
-            'address' => env('SRI_DIR_MATRIZ', 'Av. Principal'),
-            'phone' => env('APP_PHONE', ''),
+            'name' => $s->trade_name,
+            'ruc' => $s->ruc ?? '',
+            'address' => $s->address ?? '',
+            'phone' => $s->phone ?? '',
+            'tax_rate' => (float)$s->tax_rate,
         ];
     }
 

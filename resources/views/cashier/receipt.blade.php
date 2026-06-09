@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Ticket - Solémia #{{ $order->id }}</title>
+    <title>Ticket - {{ $restaurant['name'] }} #{{ $order->id }}</title>
     <style>
         @page { margin: 0; size: 80mm auto; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -106,7 +106,7 @@
 
     {{-- Encabezado --}}
     <div class="logo">&#10038; {{ $restaurant['name'] }} &#10038;</div>
-    <div class="tagline">Ristorante &middot; Guayaquil</div>
+    <div class="tagline">Ristorante</div>
     <div class="header-info">
         <div>{{ $restaurant['ruc'] }}</div>
         <div>{{ $restaurant['address'] }}</div>
@@ -162,7 +162,7 @@
     @if($order->discount > 0)
         <div class="total-row discount"><span>Descuento</span><span>-${{ number_format($order->discount, 2) }}</span></div>
     @endif
-    <div class="total-row"><span>IVA 15%</span><span>${{ number_format($order->tax, 2) }}</span></div>
+    <div class="total-row"><span>IVA {{ $restaurant['tax_rate'] }}%</span><span>${{ number_format($order->tax, 2) }}</span></div>
     @if($order->tip > 0)
         <div class="total-row"><span>Propina</span><span>${{ number_format($order->tip, 2) }}</span></div>
     @endif
@@ -217,7 +217,7 @@
     <div class="divider-dash"></div>
 
     {{-- Cierre --}}
-    <div class="thanks-main">¡Oh, Solémia de mi corazón!</div>
+    <div class="thanks-main">¡Oh, {{ $restaurant['name'] }} de mi corazón!</div>
     <div class="thanks-sub">¡Gracias por su visita!</div>
 
     <div class="footer-block">

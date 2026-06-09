@@ -210,9 +210,9 @@
                                 <x-input-label value="Propina" class="text-xs" />
                                 <div class="flex gap-1">
                                     <button wire:click="$set('tipMode', 'none')" class="px-2 py-1 text-[10px] rounded-lg border {{ $tipMode === 'none' ? 'bg-olive-600 text-white border-olive-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">Sin</button>
-                                    <button wire:click="$set('tipMode', 'ten')" class="px-2 py-1 text-[10px] rounded-lg border {{ $tipMode === 'ten' ? 'bg-olive-600 text-white border-olive-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">10%</button>
-                                    <button wire:click="$set('tipMode', 'fifteen')" class="px-2 py-1 text-[10px] rounded-lg border {{ $tipMode === 'fifteen' ? 'bg-olive-600 text-white border-olive-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">15%</button>
-                                    <button wire:click="$set('tipMode', 'twenty')" class="px-2 py-1 text-[10px] rounded-lg border {{ $tipMode === 'twenty' ? 'bg-olive-600 text-white border-olive-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">20%</button>
+                                    @foreach($this->tipSuggestions as $pct)
+                                        <button wire:click="$set('tipMode', '{{ $pct }}')" class="px-2 py-1 text-[10px] rounded-lg border {{ $tipMode == $pct ? 'bg-olive-600 text-white border-olive-600' : 'border-gray-200 text-gray-500 hover:bg-gray-50' }}">{{ $pct }}%</button>
+                                    @endforeach
                                 </div>
                             </div>
 
@@ -283,7 +283,7 @@
                                 <span>${{ number_format($selectedOrder->subtotal, 2) }}</span>
                             </div>
                             <div class="flex justify-between text-xs text-gray-500">
-                                <span>IVA 15%</span>
+                                <span>IVA {{ \App\Models\RestaurantSetting::current()->tax_rate }}%</span>
                                 <span>${{ number_format($selectedOrder->tax, 2) }}</span>
                             </div>
                             @if($discountType !== 'none')

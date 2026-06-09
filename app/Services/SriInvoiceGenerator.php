@@ -4,25 +4,29 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\RestaurantSetting;
 use DOMDocument;
 use Illuminate\Support\Facades\Storage;
 
 class SriInvoiceGenerator
 {
     protected array $config;
+    protected float $taxRate;
 
     public function __construct()
     {
+        $s = RestaurantSetting::current();
         $this->config = [
-            'ruc' => env('SRI_RUC', '9999999999999'),
-            'razon_social' => env('SRI_RAZON_SOCIAL', 'Restaurante'),
-            'nombre_comercial' => env('SRI_NOMBRE_COMERCIAL', 'Restaurante'),
-            'dir_matriz' => env('SRI_DIR_MATRIZ', 'Av. Principal'),
-            'ambiente' => env('SRI_AMBIENTE', '1'),
-            'tipo_emision' => env('SRI_TIPO_EMISION', '1'),
-            'obligado_contabilidad' => env('SRI_OBLIGADO_CONTABILIDAD', 'NO'),
-            'contribuyente_especial' => env('SRI_CONTRIBUYENTE_ESPECIAL', ''),
+            'ruc' => $s->ruc ?? '9999999999999',
+            'razon_social' => $s->legal_name ?? $s->trade_name ?? 'Restaurante',
+            'nombre_comercial' => $s->trade_name ?? 'Restaurante',
+            'dir_matriz' => $s->address ?? 'Av. Principal',
+            'ambiente' => $s->sri_environment === 'production' ? '2' : '1',
+            'tipo_emision' => '1',
+            'obligado_contabilidad' => 'NO',
+            'contribuyente_especial' => '',
         ];
+        $this->taxRate = (float)($s->tax_rate ?? 15);
     }
 
     public function generateXml(Order $order, string $customerName = '', string $customerRuc = '', string $customerEmail = '', string $customerAddress = ''): string
@@ -81,7 +85,7 @@ class SriInvoiceGenerator
         $infoFactura->appendChild($totalConImpuestos);
 
         $infoFactura->appendChild($dom->createElement('importeTotal', number_format($order->total, 2, '.', '')));
-        $infoFactura->appendChild($dom->createElement('moneda', 'DOLAR'));
+        $infoFactura->appendChild($dom->createElement('moneda', $this->config['ambiente'] === '2' ? 'DOLAR' : 'DOLAR'));
         $infoFactura->appendChild($dom->createElement('pagos'));
         $infoFactura->appendChild($dom->createElement('valorRetIva', '0'));
         $infoFactura->appendChild($dom->createElement('valorRetRenta', '0'));
@@ -102,10 +106,10 @@ class SriInvoiceGenerator
             $impuesto = $dom->createElement('impuesto');
             $impuesto->appendChild($dom->createElement('codigo', '2'));
             $impuesto->appendChild($dom->createElement('codigoPorcentaje', '2'));
-            $impuesto->appendChild($dom->createElement('tarifa', '15.00'));
+            $impuesto->appendChild($dom->createElement('tarifa', number_format($this->taxRate, 2, '.', '')));
             $base = $item->subtotal * ($item->subtotal / max($order->subtotal, 1));
             $impuesto->appendChild($dom->createElement('baseImponible', number_format($item->subtotal, 2, '.', '')));
-            $impuesto->appendChild($dom->createElement('valor', number_format($item->subtotal * 0.15, 2, '.', '')));
+            $impuesto->appendChild($dom->createElement('valor', number_format($item->subtotal * ($this->taxRate / 100), 2, '.', '')));
             $impuestos->appendChild($impuesto);
             $detalle->appendChild($impuestos);
 

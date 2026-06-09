@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Solemia')) - Solémia POS</title>
+    <title>@yield('title', config('app.name', 'Solemia')) - {{ \App\Models\RestaurantSetting::current()->trade_name }} POS</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <link href="https://fonts.bunny.net/css?family=playfair-display:500,600,700&display=swap" rel="stylesheet" />
@@ -96,7 +96,7 @@
                 @endcan
 
                 @can('ver_inventario')
-                    <x-sidebar-link href="{{ route('inventory.index') }}" :active="request()->routeIs('inventory.*')" icon="fa-solid fa-boxes-stacked" :collapsed="true">
+                    <x-sidebar-link href="{{ route('inventory.ingredients') }}" :active="request()->routeIs('inventory.*')" icon="fa-solid fa-boxes-stacked">
                         Inventario
                     </x-sidebar-link>
                 @endcan
@@ -165,9 +165,40 @@
                             :title="sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'">
                             <i class="fas fa-bars text-lg"></i>
                         </button>
-                        <h1 class="text-lg md:text-xl font-bold text-olive-900 font-serif">Mi Restaurante</h1>
+                        <div class="flex items-center gap-1.5 text-sm md:text-base">
+                            <span class="font-semibold text-gray-900">{{ \App\Models\RestaurantSetting::current()->trade_name }}</span>
+                            @php
+                                $breadcrumb = match (true) {
+                                    request()->routeIs('dashboard') => 'Dashboard',
+                                    request()->routeIs('pos.*') => 'Gestión de mesas y zonas del restaurante',
+                                    request()->routeIs('kitchen.*') => 'Cocina (KDS)',
+                                    request()->routeIs('menu.*') => 'Menú',
+                                    request()->routeIs('cashier.*') => 'Caja',
+                                    request()->routeIs('inventory.*') => 'Inventario',
+                                    request()->routeIs('customers.*') => 'Clientes',
+                                    request()->routeIs('reports.*') => 'Reportes',
+                                    request()->routeIs('users.*') => 'Usuarios',
+                                    request()->routeIs('settings.*') => 'Configuración',
+                                    request()->routeIs('profile') => 'Perfil',
+                                    default => null,
+                                };
+                            @endphp
+                            @if($breadcrumb)
+                                <i class="fas fa-chevron-right text-gray-300 text-[11px]"></i>
+                                <span class="text-gray-500">{{ $breadcrumb }}</span>
+                            @endif
+                        </div>
                     </div>
                     <div class="flex items-center gap-2 md:gap-3">
+
+                            <span class="inline-flex items-center gap-1.5 text-[11px] text-olive-500 px-2.5 py-1 bg-olive-50 border border-olive-100 rounded-full">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                En vivo · cada 15s
+                            </span>
+                            <span class="text-[11px] text-olive-400">
+                                {{ now()->format('d/m/Y  H:i') }}
+                            </span>
+
                         {{-- Dark Mode Toggle --}}
                         <button @@click="toggleDark()"
                             class="relative w-10 h-6 rounded-full transition-colors duration-300 focus:outline-none"
@@ -179,6 +210,7 @@
                             </span>
                         </button>
 
+                        <livewire:notification-bell :key="'nav-' . auth()->id()" />
                         <a href="{{ route('profile') }}" wire:navigate class="text-gray-400 hover:text-olive-600 transition-colors" title="Perfil">
                             <i class="fas fa-user-cog text-base md:text-lg"></i>
                         </a>

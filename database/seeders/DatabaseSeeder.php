@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MenuSeeder::class);
 
+        $this->call(SampleReportDataSeeder::class);
+
         // Users
         $admin = User::firstOrCreate(['email' => 'admin@solemia.com'], ['name' => 'Administrador', 'password' => bcrypt('admin123'), 'pin' => '1234']);
         $admin->assignRole('Administrador');

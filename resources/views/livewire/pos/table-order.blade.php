@@ -156,7 +156,7 @@
                     <span>${{ number_format($order->subtotal, 2) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-500">
-                    <span>IVA 15%</span>
+                    <span>IVA {{ \App\Models\RestaurantSetting::current()->tax_rate }}%</span>
                     <span>${{ number_format($order->tax, 2) }}</span>
                 </div>
                 <div class="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1 mt-1">

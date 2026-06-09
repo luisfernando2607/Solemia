@@ -4,6 +4,7 @@ namespace App\Livewire\Kitchen;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -61,11 +62,17 @@ class Index extends Component
 
     public function markAllReady($orderId): void
     {
-        $order = Order::findOrFail($orderId);
+        $order = Order::with('table')->findOrFail($orderId);
         $order->items()->where('kitchen_status', 'preparing')->update([
             'kitchen_status' => 'ready',
             'ready_at' => now(),
         ]);
+
+        app(NotificationService::class)->orderReady(
+            $order->id,
+            $order->user_id,
+            $order->table ? 'Mesa ' . $order->table->number : 'Para llevar',
+        );
     }
 
     public function completeOrder($orderId): void

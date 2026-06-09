@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Users\Index as UsersIndex;
+use App\Models\RestaurantSetting;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -48,26 +49,32 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('cashier/receipt/{order}', function (\App\Models\Order $order) {
             $payment = $order->payments()->where('status', 'approved')->first();
             $invoice = $order->invoices()->first();
+            $s = RestaurantSetting::current();
             $restaurant = [
-                'name' => env('SRI_NOMBRE_COMERCIAL', 'Solemia'),
-                'ruc' => env('SRI_RUC', '9999999999999'),
-                'address' => env('SRI_DIR_MATRIZ', 'Av. Principal'),
-                'phone' => env('APP_PHONE', ''),
+                'name' => $s->trade_name,
+                'ruc' => $s->ruc ?? '',
+                'address' => $s->address ?? '',
+                'phone' => $s->phone ?? '',
+                'tax_rate' => (float)$s->tax_rate,
             ];
             return view('cashier.receipt', compact('order', 'payment', 'invoice', 'restaurant'));
         })->name('cashier.receipt');
     });
 
     Route::middleware(['can:ver_inventario'])->group(function () {
-        Route::view('inventory', 'livewire.inventory.index')->name('inventory.index');
+        Route::get('inventory', \App\Livewire\Inventory\IngredientIndex::class)->name('inventory.ingredients');
+        Route::get('inventory/ingredients', \App\Livewire\Inventory\IngredientIndex::class)->name('inventory.ingredients');
+        Route::get('inventory/recipes', \App\Livewire\Inventory\RecipeIndex::class)->name('inventory.recipes');
+        Route::get('inventory/suppliers', \App\Livewire\Inventory\SupplierIndex::class)->name('inventory.suppliers');
+        Route::get('inventory/purchases', \App\Livewire\Inventory\PurchaseOrderIndex::class)->name('inventory.purchases');
     });
 
     Route::middleware(['can:ver_reportes'])->group(function () {
-        Route::view('reports', 'livewire.reports.index')->name('reports.index');
+        Route::get('reports', \App\Livewire\Reports\Index::class)->name('reports.index');
     });
 
     Route::middleware(['can:configurar_sistema'])->group(function () {
-        Route::view('settings', 'livewire.settings.index')->name('settings.index');
+        Route::get('settings', \App\Livewire\Settings\Index::class)->name('settings.index');
     });
 });
 
