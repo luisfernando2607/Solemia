@@ -5,8 +5,61 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --bg-primary: #F5F0E8;
+        --bg-secondary: #ffffff;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --border-color: #e5e7eb;
+    }
+
+    .dark {
+        --bg-primary: #0D1609;
+        --bg-secondary: #1A2B15;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --border-color: #2F3D23;
+    }
+
     body {
         @apply bg-cream text-gray-800;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .dark body,
+    body.dark {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .dark .bg-white {
+        background-color: var(--bg-secondary);
+    }
+
+    .dark .border-gray-100,
+    .dark .border-gray-200 {
+        border-color: var(--border-color);
+    }
+
+    .dark .text-gray-400,
+    .dark .text-gray-500 {
+        color: var(--text-secondary);
+    }
+
+    .dark .text-gray-600,
+    .dark .text-gray-700,
+    .dark .text-gray-800,
+    .dark .text-gray-900 {
+        color: var(--text-primary);
+    }
+
+    .dark .bg-gray-50 {
+        background-color: #1A2B15;
+    }
+
+    .dark .hover\:bg-gray-50:hover {
+        background-color: #2F3D23;
     }
 }
 

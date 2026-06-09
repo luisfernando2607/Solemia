@@ -221,7 +221,6 @@
     <div class="thanks-sub">¡Gracias por su visita!</div>
 
     <div class="footer-block">
-        www.solemia.com<br>
         Original: Cliente &middot; Copia: Emisor<br>
         Términos y condiciones: consulte en nuestro sitio web
     </div>
