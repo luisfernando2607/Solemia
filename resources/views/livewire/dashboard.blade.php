@@ -267,6 +267,30 @@
     .qa-btn:hover { background: #fff; border-color: var(--o300); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
     .qa-btn i { font-size: 1.1rem; color: var(--o500); }
 
+    /* ── TOP PRODUCTS ──────────────────────────────────── */
+    .top-product-row {
+        display: flex; align-items: center; gap: 0.6rem;
+        padding: 0.55rem 0.5rem; border-bottom: 1px solid var(--cream3);
+    }
+    .top-product-row:last-child { border-bottom: none; }
+    .top-product-rank {
+        font-size: 0.7rem; font-weight: 700; min-width: 1.2rem; text-align: center;
+    }
+    .top-product-info { flex: 1; min-width: 0; }
+    .top-product-name {
+        font-size: 0.8rem; font-weight: 600; color: var(--o800);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .top-product-qty {
+        font-size: 0.68rem; color: var(--o400); margin-top: 0.1rem;
+    }
+    .top-product-bar {
+        width: 60px; height: 4px; background: var(--cream3); border-radius: 2px; overflow: hidden; flex-shrink: 0;
+    }
+    .top-product-bar-fill {
+        height: 100%; border-radius: 2px; background: var(--o400); transition: width 0.4s ease;
+    }
+
     /* ── POLL INDICATOR ───────────────────────────────── */
     .poll-badge {
         display: inline-flex; align-items: center; gap: 0.4rem;
@@ -380,20 +404,20 @@
                 </div>
                 <div class="mini-stats">
                     <div class="mini-stat">
-                        <div class="mini-stat-n" style="color:var(--o700);">10</div>
-                        <div class="mini-stat-l">Módulos</div>
+                        <div class="mini-stat-n" style="color:var(--o700);">{{ $ordersToday }}</div>
+                        <div class="mini-stat-l">Órdenes hoy</div>
                     </div>
                     <div class="mini-stat">
-                        <div class="mini-stat-n" style="color:var(--g400);">5</div>
-                        <div class="mini-stat-l">Roles</div>
+                        <div class="mini-stat-n" style="color:var(--g400);">${{ number_format($avgTicket, 2) }}</div>
+                        <div class="mini-stat-l">Ticket prom.</div>
                     </div>
                     <div class="mini-stat">
-                        <div class="mini-stat-n" style="color:#059669;">32</div>
-                        <div class="mini-stat-l">Permisos</div>
+                        <div class="mini-stat-n" style="color:#059669;">{{ $itemsSoldToday }}</div>
+                        <div class="mini-stat-l">Artículos vend.</div>
                     </div>
                     <div class="mini-stat">
-                        <div class="mini-stat-n" style="color:var(--r500);">{{ $totalUsers }}</div>
-                        <div class="mini-stat-l">Usuarios</div>
+                        <div class="mini-stat-n" style="color:var(--r500);">{{ $lowStockCount }}</div>
+                        <div class="mini-stat-l">Stock bajo</div>
                     </div>
                 </div>
             </div>
@@ -403,11 +427,11 @@
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="panel-title-dot"></span>
-                        Ventas de la semana
+                        {{ $chartPeriod === 'week' ? 'Ventas de la semana' : 'Ventas del mes' }}
                     </div>
                     <div class="chart-tabs">
-                        <button class="chart-tab active">Semana</button>
-                        <button class="chart-tab">Mes</button>
+                        <button wire:click="changeChartPeriod('week')" class="chart-tab {{ $chartPeriod === 'week' ? 'active' : '' }}">Semana</button>
+                        <button wire:click="changeChartPeriod('month')" class="chart-tab {{ $chartPeriod === 'month' ? 'active' : '' }}">Mes</button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -416,67 +440,119 @@
                         <div class="chart-legend">
                             <div class="chart-legend-item">
                                 <div class="chart-legend-dot" style="background:var(--o500);"></div>
-                                Esta semana
+                                {{ $chartPeriod === 'week' ? 'Esta semana' : 'Este mes' }}
                             </div>
                             <div class="chart-legend-item">
                                 <div class="chart-legend-dot" style="background:var(--cream3);"></div>
-                                Semana pasada
+                                {{ $chartPeriod === 'week' ? 'Semana pasada' : 'Mes pasado' }}
                             </div>
                         </div>
                     </div>
+@php
+    $xStart = 48;
+    $xEnd = 548;
+    $yTop = 20;
+    $yBottom = 155;
+    $yRange = $yBottom - $yTop;
+
+    if ($chartPeriod === 'week') {
+        $labels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        $count = 7;
+        $xStep = ($xEnd - $xStart) / ($count - 1);
+
+        $primary = collect($weeklySales);
+        $secondary = collect($lastWeekSales);
+    } else {
+        $labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'];
+        $count = 5;
+        $xStep = ($xEnd - $xStart) / ($count - 1);
+
+        $primary = collect($monthlySales);
+        $secondary = collect($lastMonthSales);
+    }
+
+    $primaryVals = [];
+    $secondaryVals = [];
+    $allValues = [];
+    for ($i = 0; $i < $count; $i++) {
+        $v = (float) ($primary->get($i + 1) ?? 0);
+        $primaryVals[] = $v;
+        $allValues[] = $v;
+        $v = (float) ($secondary->get($i + 1) ?? 0);
+        $secondaryVals[] = $v;
+        $allValues[] = $v;
+    }
+
+    $maxVal = max(max($allValues), 1);
+
+    $niceMax = $maxVal;
+    if ($niceMax <= 10)      $niceMax = ceil($niceMax / 5) * 5;
+    elseif ($niceMax <= 50)   $niceMax = ceil($niceMax / 10) * 10;
+    elseif ($niceMax <= 200)  $niceMax = ceil($niceMax / 50) * 50;
+    elseif ($niceMax <= 1000) $niceMax = ceil($niceMax / 100) * 100;
+    elseif ($niceMax <= 5000) $niceMax = ceil($niceMax / 500) * 500;
+    else                      $niceMax = ceil($niceMax / 1000) * 1000;
+
+    $yLabels = [$niceMax, round($niceMax * 3 / 4), round($niceMax / 2), round($niceMax / 4)];
+
+    $secondaryPts = [];
+    $primaryPts = [];
+    $dots = [];
+    for ($i = 0; $i < $count; $i++) {
+        $x = round($xStart + $i * $xStep, 1);
+        $yS = round($yBottom - ($secondaryVals[$i] / $niceMax) * $yRange, 1);
+        $yP = round($yBottom - ($primaryVals[$i] / $niceMax) * $yRange, 1);
+        $secondaryPts[] = "$x,$yS";
+        $primaryPts[] = "$x,$yP";
+        $dots[] = (object)['x' => $x, 'y' => $yP, 'val' => $primaryVals[$i]];
+    }
+
+    $areaD = 'M' . implode(' L', $primaryPts) . " L$xEnd,$yBottom L$xStart,$yBottom Z";
+@endphp
                     <div class="chart-container">
-                        <svg class="chart-svg" viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="chart-svg" viewBox="0 0 560 180"
+                             xmlns="http://www.w3.org/2000/svg"
+                             x-data="{ tip: { show: false, x: 0, y: 0, val: 0, lbl: '' } }">
                             <defs>
                                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%"   stop-color="#677c3e" stop-opacity="0.15"/>
                                     <stop offset="100%" stop-color="#677c3e" stop-opacity="0"/>
                                 </linearGradient>
                             </defs>
-                            <!-- Grid lines -->
                             <line x1="48" y1="20"  x2="548" y2="20"  class="chart-gridline"/>
                             <line x1="48" y1="60"  x2="548" y2="60"  class="chart-gridline"/>
                             <line x1="48" y1="100" x2="548" y2="100" class="chart-gridline"/>
                             <line x1="48" y1="140" x2="548" y2="140" class="chart-gridline"/>
-                            <!-- Y axis labels -->
                             <g class="chart-yaxis">
-                                <text x="40" y="24"  text-anchor="end">600</text>
-                                <text x="40" y="64"  text-anchor="end">450</text>
-                                <text x="40" y="104" text-anchor="end">300</text>
-                                <text x="40" y="144" text-anchor="end">150</text>
+                                <text x="40" y="24"  text-anchor="end">{{ $yLabels[0] }}</text>
+                                <text x="40" y="64"  text-anchor="end">{{ $yLabels[1] }}</text>
+                                <text x="40" y="104" text-anchor="end">{{ $yLabels[2] }}</text>
+                                <text x="40" y="144" text-anchor="end">{{ $yLabels[3] }}</text>
                             </g>
-                            <!-- Previous week (gray) -->
-                            <polyline
-                                points="48,120  130,110  212,130  294,95  376,115  458,90  548,105"
-                                fill="none" stroke="#c8d3b1" stroke-width="1.5"
-                                stroke-dasharray="4,3" stroke-linecap="round" stroke-linejoin="round"
-                            />
-                            <!-- This week area -->
-                            <path
-                                d="M48,110 L130,90 L212,115 L294,55 L376,80 L458,40 L548,65 L548,155 L48,155 Z"
-                                class="chart-area"
-                            />
-                            <!-- This week line -->
-                            <polyline
-                                class="chart-line"
-                                points="48,110  130,90  212,115  294,55  376,80  458,40  548,65"
-                            />
-                            <!-- Dots -->
-                            <circle class="chart-dot" cx="48"  cy="110" r="4"/>
-                            <circle class="chart-dot" cx="130" cy="90"  r="4"/>
-                            <circle class="chart-dot" cx="212" cy="115" r="4"/>
-                            <circle class="chart-dot" cx="294" cy="55"  r="4" style="fill:var(--o500);"/>
-                            <circle class="chart-dot" cx="376" cy="80"  r="4"/>
-                            <circle class="chart-dot" cx="458" cy="40"  r="4"/>
-                            <circle class="chart-dot" cx="548" cy="65"  r="4"/>
-                            <!-- X axis labels -->
+                            <polyline points="{{ implode(' ', $secondaryPts) }}" fill="none" stroke="#c8d3b1" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="{{ $areaD }}" class="chart-area" />
+                            <polyline points="{{ implode(' ', $primaryPts) }}" class="chart-line" />
+                            @foreach($dots as $i => $dot)
+                            <g style="cursor:pointer;">
+                                <circle class="chart-dot" cx="{{ $dot->x }}" cy="{{ $dot->y }}" r="4"
+                                        @if($i === floor(($count - 1) / 2)) style="fill:var(--o500);" @endif
+                                        @@mouseenter="tip = { show: true, x: {{ $dot->x }}, y: {{ $dot->y }}, val: {{ $dot->val }}, lbl: '{{ $labels[$i] }}' }"
+                                        @@mouseleave="tip.show = false" />
+                                <circle cx="{{ $dot->x }}" cy="{{ $dot->y }}" r="10" fill="transparent"
+                                        @@mouseenter="tip = { show: true, x: {{ $dot->x }}, y: {{ $dot->y }}, val: {{ $dot->val }}, lbl: '{{ $labels[$i] }}' }"
+                                        @@mouseleave="tip.show = false" />
+                            </g>
+                            @endforeach
+                            <g x-show="tip.show"
+                               :transform="'translate(' + (tip.x - 40) + ',' + (tip.y - 30) + ')'">
+                                <rect width="80" height="22" rx="4" fill="#3d4a24" opacity="0.95" />
+                                <text x="40" y="14" text-anchor="middle" font-size="9" fill="#fff" font-weight="600"
+                                      x-text="(tip.val > 0 ? '$' + tip.val.toFixed(2) : 'Sin ventas') + '  (' + tip.lbl + ')'"></text>
+                            </g>
                             <g class="chart-xaxis">
-                                <text x="48"  y="170" text-anchor="middle">Lun</text>
-                                <text x="130" y="170" text-anchor="middle">Mar</text>
-                                <text x="212" y="170" text-anchor="middle">Mié</text>
-                                <text x="294" y="170" text-anchor="middle">Jue</text>
-                                <text x="376" y="170" text-anchor="middle">Vie</text>
-                                <text x="458" y="170" text-anchor="middle">Sáb</text>
-                                <text x="548" y="170" text-anchor="middle">Dom</text>
+                                @foreach($labels as $i => $label)
+                                <text x="{{ round($xStart + $i * $xStep, 1) }}" y="170" text-anchor="middle">{{ $label }}</text>
+                                @endforeach
                             </g>
                         </svg>
                     </div>
@@ -599,41 +675,36 @@
                 </div>
             </div>
 
-            {{-- Quick actions --}}
+            {{-- Top products today --}}
             <div class="panel">
                 <div class="panel-header">
                     <div class="panel-title">
                         <span class="panel-title-dot"></span>
-                        Acciones rápidas
+                        Top productos hoy
                     </div>
+                    <span class="poll-badge">
+                        <span class="poll-dot"></span>
+                        En vivo
+                    </span>
                 </div>
-                <div class="panel-body">
-                    <div class="quick-actions">
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-plus-circle"></i>
-                            Nueva comanda
-                        </a>
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-cash-register"></i>
-                            Abrir caja
-                        </a>
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-boxes-stacked"></i>
-                            Inventario
-                        </a>
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-file-invoice"></i>
-                            Facturar
-                        </a>
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-chart-line"></i>
-                            Reportes
-                        </a>
-                        <a href="#" class="qa-btn">
-                            <i class="fas fa-users-cog"></i>
-                            Usuarios
-                        </a>
+                <div class="panel-body" style="padding:0.5rem;">
+                    @forelse($topProductsToday as $p)
+                    <div class="top-product-row">
+                        <div class="top-product-rank" style="color:var(--o400);">{{ $loop->iteration }}</div>
+                        <div class="top-product-info">
+                            <div class="top-product-name">{{ $p->product->name ?? '—' }}</div>
+                            <div class="top-product-qty">{{ $p->qty }} und. · ${{ number_format($p->revenue, 2) }}</div>
+                        </div>
+                        <div class="top-product-bar">
+                            <div class="top-product-bar-fill" style="width:{{ $loop->first ? 100 : round(($p->qty / ($topProductsToday->first()->qty ?: 1)) * 100) }}%;"></div>
+                        </div>
                     </div>
+                    @empty
+                    <p style="text-align:center;color:var(--o400);font-size:0.8rem;padding:1.5rem 0;">
+                        <i class="fas fa-receipt" style="display:block;font-size:1.5rem;margin-bottom:0.5rem;opacity:0.4;"></i>
+                        Sin ventas hoy
+                    </p>
+                    @endforelse
                 </div>
             </div>
 
