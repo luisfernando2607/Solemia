@@ -144,6 +144,8 @@ class TableOrder extends Component
             'sent_at' => now(),
         ]);
 
+        $this->dispatch('refreshKitchenBadge');
+
         $this->js("Swal.fire({icon:'success',title:'¡Comanda enviada!',text:'La orden ha sido enviada a cocina',timer:2000,showConfirmButton:false})");
     }
 

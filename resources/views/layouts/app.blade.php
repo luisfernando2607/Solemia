@@ -78,9 +78,12 @@
                 @endcan
 
                 @can('ver_kds')
-                    <x-sidebar-link href="{{ route('kitchen.index') }}" :active="request()->routeIs('kitchen.*')" icon="fa-solid fa-fire" :collapsed="true">
-                        Cocina (KDS)
-                    </x-sidebar-link>
+                    <div class="relative">
+                        <x-sidebar-link href="{{ route('kitchen.index') }}" :active="request()->routeIs('kitchen.*')" icon="fa-solid fa-fire" :collapsed="true">
+                            Cocina (KDS)
+                        </x-sidebar-link>
+                        <livewire:kitchen-badge />
+                    </div>
                 @endcan
 
                 @can('editar_menu')
