@@ -195,7 +195,10 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                 En vivo · cada 15s
                             </span>
-                            <span class="text-[11px] text-olive-400">
+                            <span class="text-[11px] text-olive-400"
+                                  x-data="{ now: new Date() }"
+                                  x-init="setInterval(() => now = new Date(), 1000)"
+                                  x-text="String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + '  ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')">
                                 {{ now()->format('d/m/Y  H:i') }}
                             </span>
 
