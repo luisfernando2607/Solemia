@@ -77,12 +77,14 @@ class Index extends Component
 
     public function getDashboardHourlySalesProperty()
     {
-        return Order::where('status', 'complete')
+        $rows = Order::where('status', 'complete')
             ->whereDate('closed_at', today())
-            ->select(DB::raw('HOUR(closed_at) as hour'), DB::raw('SUM(total) as total'))
+            ->select(DB::raw('HOUR(closed_at) as hour'), DB::raw('SUM(COALESCE(total,0)) as total'))
             ->groupBy('hour')
             ->orderBy('hour')
             ->pluck('total', 'hour');
+
+        return collect(range(0, 23))->mapWithKeys(fn($h) => [$h => (float)($rows[$h] ?? 0)]);
     }
 
     public function getDashboardRecentOrdersProperty()
